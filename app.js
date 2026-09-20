@@ -45,75 +45,96 @@ function choose(v){selected=v;remaining=v;running=false;stopRAF();done.classList
 function adjust(delta){selected=Math.max(5,Math.min(3600,selected+delta));remaining=selected;running=false;stopRAF();done.classList.remove('show');app.classList.remove('finished');setPlayIcon();render()}
 
 function unlockAudio(){
-  if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state==='suspended')audioCtx.resume();
+  try{
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+
+    if(audioCtx.state === 'suspended'){
+      audioCtx.resume();
+    }
+
+    // Pequeno sinal silencioso para desbloquear o áudio no iOS
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    gain.gain.setValueAtTime(0.00001, audioCtx.currentTime);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.03);
+
+  }catch(e){
+    console.warn('Áudio não pôde ser desbloqueado:', e);
+  }
 }
 function beep(){
   try{
     unlockAudio();
 
-    const now = audioCtx.currentTime;
+    if(!audioCtx) return;
 
-    const pulses = [
-      { start: 0.00, duration: 0.42, freq: 1046 },
-      { start: 0.50, duration: 0.42, freq: 880 },
-      { start: 1.00, duration: 0.70, freq: 1175 }
-    ];
+    const playAlert = () => {
+      const now = audioCtx.currentTime;
 
-    pulses.forEach(p => {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
+      const pulses = [
+        { start: 0.00, duration: 0.38, freq: 880 },
+        { start: 0.45, duration: 0.38, freq: 1046 },
+        { start: 0.90, duration: 0.75, freq: 1318 }
+      ];
 
-      osc.type = 'square';
+      pulses.forEach(p => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
 
-      osc.frequency.setValueAtTime(
-        p.freq,
-        now + p.start
-      );
+        osc.type = 'square';
+        osc.frequency.setValueAtTime(p.freq, now + p.start);
 
-      osc.frequency.exponentialRampToValueAtTime(
-        p.freq * 0.88,
-        now + p.start + p.duration
-      );
+        gain.gain.setValueAtTime(0.0001, now + p.start);
+        gain.gain.linearRampToValueAtTime(
+          0.85,
+          now + p.start + 0.015
+        );
 
-      gain.gain.setValueAtTime(
-        0.0001,
-        now + p.start
-      );
+        gain.gain.setValueAtTime(
+          0.85,
+          now + p.start + p.duration - 0.05
+        );
 
-      gain.gain.exponentialRampToValueAtTime(
-        0.9,
-        now + p.start + 0.018
-      );
+        gain.gain.linearRampToValueAtTime(
+          0.0001,
+          now + p.start + p.duration
+        );
 
-      gain.gain.setValueAtTime(
-        0.9,
-        now + p.start + p.duration - 0.06
-      );
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
 
-      gain.gain.exponentialRampToValueAtTime(
-        0.0001,
-        now + p.start + p.duration
-      );
+        osc.start(now + p.start);
+        osc.stop(now + p.start + p.duration + 0.03);
+      });
+    };
 
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-
-      osc.start(now + p.start);
-      osc.stop(now + p.start + p.duration + 0.02);
-    });
+    if(audioCtx.state === 'suspended'){
+      audioCtx.resume().then(playAlert);
+    }else{
+      playAlert();
+    }
 
     if(navigator.vibrate){
       navigator.vibrate([
-        350,
+        400,
         100,
-        350,
+        400,
         100,
-        650
+        700
       ]);
     }
 
-  }catch(e){}
+  }catch(e){
+    console.warn('Erro ao tocar alerta:', e);
+  }
 }
 function finish(){
   running=false;stopRAF();remaining=0;render();setPlayIcon();
