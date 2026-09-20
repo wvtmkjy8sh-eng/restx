@@ -1,3 +1,4 @@
+const alertAudio = document.getElementById('restxAlertAudio');
 const $=s=>document.querySelector(s);
 const minutes=$('#minutes'), seconds=$('#seconds'), ring=$('#ring'), setLabel=$('#setLabel');
 const startBtn=$('#start'), startText=$('#startText'), startIcon=$('#startIcon');
@@ -49,70 +50,41 @@ function unlockAudio(){
     if(!audioCtx){
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
+    if(audioCtx.state === 'suspended') audioCtx.resume();
 
-    if(audioCtx.state === 'suspended'){
-      audioCtx.resume();
+    if(alertAudio){
+      alertAudio.volume = 0.001;
+      const p = alertAudio.play();
+      if(p && p.then){
+        p.then(()=>{
+          alertAudio.pause();
+          alertAudio.currentTime = 0;
+        }).catch(()=>{});
+      }
     }
-
-    // Pequeno sinal silencioso para desbloquear o áudio no iOS
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    gain.gain.setValueAtTime(0.00001, audioCtx.currentTime);
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-
-    osc.start();
-    osc.stop(audioCtx.currentTime + 0.03);
-
-  }catch(e){
-    console.warn('Áudio não pôde ser desbloqueado:', e);
-  }
+  }catch(e){}
 }
+
 function beep(){
   try{
-    unlockAudio();
+    if(alertAudio){
+      alertAudio.pause();
+      alertAudio.currentTime = 0;
+      alertAudio.volume = 1.0;
+      const p = alertAudio.play();
+      if(p && p.catch) p.catch(()=>playWebAudioAlert());
+    }else{
+      playWebAudioAlert();
+    }
 
-    if(!audioCtx) return;
+    if(navigator.vibrate){
+      navigator.vibrate([400,100,400,100,700]);
+    }
+  }catch(e){
+    playWebAudioAlert();
+  }
+}
 
-    const playAlert = () => {
-      const now = audioCtx.currentTime;
-
-      const pulses = [
-        { start: 0.00, duration: 0.38, freq: 880 },
-        { start: 0.45, duration: 0.38, freq: 1046 },
-        { start: 0.90, duration: 0.75, freq: 1318 }
-      ];
-
-      pulses.forEach(p => {
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(p.freq, now + p.start);
-
-        gain.gain.setValueAtTime(0.0001, now + p.start);
-        gain.gain.linearRampToValueAtTime(
-          0.85,
-          now + p.start + 0.015
-        );
-
-        gain.gain.setValueAtTime(
-          0.85,
-          now + p.start + p.duration - 0.05
-        );
-
-        gain.gain.linearRampToValueAtTime(
-          0.0001,
-          now + p.start + p.duration
-        );
-
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-
-        osc.start(now + p.start);
-        osc.stop(now + p.start + p.duration + 0.03);
       });
     };
 
@@ -132,10 +104,9 @@ function beep(){
       ]);
     }
 
-  }catch(e){
+  catch(e){
     console.warn('Erro ao tocar alerta:', e);
   }
-}
 function finish(){
   running=false;stopRAF();remaining=0;render();setPlayIcon();
   app.classList.add('finished');done.classList.add('show');beep();
@@ -159,3 +130,31 @@ window.addEventListener('appinstalled',()=>$('#installBtn').classList.add('hidde
 
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 render();
+
+function playWebAudioAlert(){
+  try{
+    unlockAudio();
+    if(!audioCtx) return;
+    const now=audioCtx.currentTime;
+    const pulses=[
+      {start:0,duration:.42,freq:880},
+      {start:.48,duration:.42,freq:1046},
+      {start:.96,duration:.82,freq:1318}
+    ];
+    pulses.forEach(p=>{
+      const osc=audioCtx.createOscillator();
+      const gain=audioCtx.createGain();
+      osc.type='square';
+      osc.frequency.setValueAtTime(p.freq,now+p.start);
+      gain.gain.setValueAtTime(.0001,now+p.start);
+      gain.gain.linearRampToValueAtTime(.85,now+p.start+.015);
+      gain.gain.setValueAtTime(.85,now+p.start+p.duration-.055);
+      gain.gain.linearRampToValueAtTime(.0001,now+p.start+p.duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now+p.start);
+      osc.stop(now+p.start+p.duration+.02);
+    });
+  }catch(e){}
+}
+
