@@ -1,0 +1,22 @@
+{
+	"appId": "com.restx.timer",
+	"appName": "RestX",
+	"webDir": "dist",
+	"bundledWebRuntime": false,
+	"plugins": {
+		"LocalNotifications": {
+			"smallIcon": "ic_stat_restx",
+			"iconColor": "#B8FF3D",
+			"sound": "restx_alert.wav",
+			"presentationOptions": [
+				"badge",
+				"sound",
+				"banner",
+				"list"
+			]
+		}
+	},
+	"server": {
+		"androidScheme": "https"
+	}
+}

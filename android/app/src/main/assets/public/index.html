@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b0a">
+<meta name="description" content="RestX — contador de descanso para academia">
+<link rel="manifest" href="/manifest.json">
+<title>RestX</title>
+  <script type="module" crossorigin src="/assets/index-Xag0AQzi.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-19R9GFFr.css">
+</head>
+<body>
+<div class="background"><img src="/assets_bg.svg" alt=""></div>
+<main class="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-dot"></span><strong>RestX</strong><span class="brand-sub">REST TIMER</span></div>
+    <button id="installBtn" class="install" hidden aria-label="Instalar RestX">↓</button>
+  </header>
+
+  <section class="timer-section">
+    <div class="eyebrow">DESCANSO</div>
+    <div class="timer-wrap"><div class="sound-waves" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <svg class="progress" viewBox="0 0 300 300" aria-hidden="true">
+        <circle class="track" cx="150" cy="150" r="132"></circle>
+        <circle id="ring" class="ring" cx="150" cy="150" r="132"></circle>
+      </svg>
+      <div class="timer-center">
+        <span id="status">PRONTO</span>
+        <div class="time"><span id="minutes">01</span><b>:</b><span id="seconds">00</span></div>
+        <span class="next">PRÓXIMO EXERCÍCIO</span>
+      </div>
+    </div>
+
+    <div id="done" class="done" role="status" aria-live="assertive">DESCANSO FINALIZADO</div>
+
+    <div class="controls">
+      <button id="minus" class="small-btn" aria-label="Diminuir 5 segundos">−5</button>
+      <button id="start" class="start-btn">
+        <svg id="startIcon" viewBox="0 0 24 24"><path d="m9 5 10 7-10 7V5Z"/></svg>
+        <span id="startText">Iniciar</span>
+      </button>
+      <button id="reset" class="small-btn" aria-label="Resetar">↻</button>
+      <button id="plus" class="small-btn" aria-label="Aumentar 5 segundos">+5</button>
+    </div>
+  </section>
+
+  <section class="presets">
+    <span>DESCANSO RÁPIDO</span>
+    <div class="preset-list">
+      <button class="preset" data-time="30">30s</button>
+      <button class="preset" data-time="45">45s</button>
+      <button class="preset active" data-time="60">60s</button>
+      <button class="preset" data-time="90">90s</button>
+      <button class="preset" data-time="120">120s</button>
+    </div>
+  </section>
+
+  <footer><span>Treine.</span><span>Descanse.</span><span>Repita.</span></footer>
+  <audio id="restxAlertAudio" preload="auto" playsinline>
+    <source src="/restx-alert.wav" type="audio/wav">
+  </audio>
+</main>
+</body>
+</html>
