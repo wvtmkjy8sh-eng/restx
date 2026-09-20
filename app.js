@@ -1,3 +1,6 @@
+import { Capacitor } from '@capacitor/core';
+import { LocalNotifications } from '@capacitor/local-notifications';
+
 const $=s=>document.querySelector(s),
 minutes=$('#minutes'),seconds=$('#seconds'),ring=$('#ring'),
 statusEl=$('#status'),done=$('#done'),app=document.querySelector('.app'),
@@ -76,7 +79,83 @@ function beep(){
   }catch(e){fallback()}
 }
 
+
+const NATIVE_NOTIFICATION_ID=9001001;
+const NATIVE_CHANNEL_ID='restx-rest';
+let nativeNotificationsReady=false;
+
+function isNativeApp(){
+  try{return Capacitor.isNativePlatform()}catch(e){return false}
+}
+
+async function setupNativeNotifications(){
+  if(!isNativeApp())return false;
+  try{
+    let perm=await LocalNotifications.checkPermissions();
+    if(perm.display!=='granted'){
+      perm=await LocalNotifications.requestPermissions();
+    }
+    if(perm.display!=='granted')return false;
+    if(Capacitor.getPlatform()==='android'){
+      try{
+        await LocalNotifications.createChannel({
+          id:NATIVE_CHANNEL_ID,
+          name:'RestX — descanso',
+          description:'Alertas do fim do descanso',
+          sound:'restx_alert',
+          importance:5,
+          vibration:true,
+          lights:true,
+          lightColor:'#B8FF3D'
+        });
+      }catch(e){}
+    }
+    nativeNotificationsReady=true;
+    return true;
+  }catch(e){
+    return false;
+  }
+}
+
+async function scheduleNativeFinish(endTimestamp){
+  if(!isNativeApp())return false;
+  try{
+    if(!nativeNotificationsReady && !(await setupNativeNotifications()))return false;
+    await LocalNotifications.cancel({notifications:[{id:NATIVE_NOTIFICATION_ID}]});
+  }catch(e){}
+  try{
+    const at=new Date(endTimestamp);
+    if(at.getTime()<=Date.now())return false;
+    await LocalNotifications.schedule({
+      notifications:[{
+        id:NATIVE_NOTIFICATION_ID,
+        title:'RestX — descanso finalizado',
+        body:'Seu descanso terminou. Próximo exercício.',
+        schedule:{
+          at,
+          allowWhileIdle:true
+        },
+        sound:'restx_alert.wav',
+        channelId:NATIVE_CHANNEL_ID,
+        extra:{type:'restx-finish'}
+      }]
+    });
+    return true;
+  }catch(e){
+    console.warn('RestX native notification schedule failed',e);
+    return false;
+  }
+}
+
+async function cancelNativeFinish(){
+  if(!isNativeApp())return;
+  try{
+    await LocalNotifications.cancel({notifications:[{id:NATIVE_NOTIFICATION_ID}]});
+  }catch(e){}
+}
+
 async function enableNotifications(){
+  if(isNativeApp()) return setupNativeNotifications();
   if(!('Notification' in window))return false;
   if(Notification.permission==='granted')return true;
   if(Notification.permission==='denied')return false;
@@ -90,10 +169,10 @@ function notifyFinish(){
     tag:'restx-rest-finished',
     renotify:true,
     requireInteraction:false,
-    icon:'./icons/icon-192.svg',
-    badge:'./icons/icon-192.svg',
+    icon:'/icons/icon-192.svg',
+    badge:'/icons/icon-192.svg',
     vibrate:[400,100,400,100,700],
-    data:{url:'./'}
+    data:{url:'/'}
   };
   try{
     if(navigator.serviceWorker?.controller){
@@ -135,7 +214,7 @@ function armBackgroundTimer(){
       endAt,
       title:'RestX — descanso finalizado',
       body:'Seu descanso terminou. Próximo exercício.',
-      url:'./'
+      url:'/'
     });
   }catch(e){}
 }
@@ -160,6 +239,7 @@ async function start(){
   done.classList.remove('show');
   app.classList.remove('finished');
   state();render();saveTimer();armBackgroundTimer();
+  if(isNativeApp()) await scheduleNativeFinish(endAt);
   raf=requestAnimationFrame(tick);
 }
 function reset(){
@@ -171,6 +251,7 @@ function reset(){
   done.classList.remove('show');
   app.classList.remove('finished');
   state();render();saveTimer();
+  cancelNativeFinish();
   try{navigator.serviceWorker?.controller?.postMessage({type:'CANCEL_TIMER'})}catch(e){}
 }
 function choose(v){
@@ -181,6 +262,7 @@ function choose(v){
   done.classList.remove('show');
   app.classList.remove('finished');
   state();render();saveTimer();
+  cancelNativeFinish();
   try{navigator.serviceWorker?.controller?.postMessage({type:'CANCEL_TIMER'})}catch(e){}
 }
 function adjust(d){choose(Math.min(3600,Math.max(5,selected+d)))}
@@ -194,6 +276,7 @@ function finish(){
   app.classList.add('finished');
   done.classList.add('show');
   saveTimer();
+  cancelNativeFinish();
   try{navigator.serviceWorker?.controller?.postMessage({type:'CANCEL_TIMER'})}catch(e){}
   beep();
   notifyFinish();
@@ -228,6 +311,7 @@ async function restoreTimer(){
     endAt=Number(saved.endAt);
     document.querySelectorAll('.preset').forEach(b=>b.classList.toggle('active',+b.dataset.time===selected));
     state();render();armBackgroundTimer();
+    if(isNativeApp()) await scheduleNativeFinish(endAt);
     raf=requestAnimationFrame(tick);
   }catch(e){
     localStorage.removeItem(TIMER_KEY);

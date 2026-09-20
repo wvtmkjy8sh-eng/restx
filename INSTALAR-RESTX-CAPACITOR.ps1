@@ -1,0 +1,11 @@
+Write-Host "RESTX - Capacitor" -ForegroundColor Green
+Write-Host "1. Instale as dependencias:"
+Write-Host "   npm install"
+Write-Host ""
+Write-Host "2. Android:"
+Write-Host "   npm run cap:add:android"
+Write-Host ""
+Write-Host "3. Depois abra:"
+Write-Host "   npm run cap:android"
+Write-Host ""
+Write-Host "iPhone/iOS precisa de macOS + Xcode."
