@@ -1,0 +1,8 @@
+O teste correto deve mostrar o RestX instalado pelo Android Studio,
+com icone/aplicativo próprio no telefone.
+
+Se voce estiver vendo o RestX dentro do Chrome/Safari ou usando "Adicionar
+à Tela de Início" do navegador, ainda é a versão PWA, nao a versão Capacitor.
+
+No Android, o app nativo será identificado pelo pacote:
+    com.restx.timer
