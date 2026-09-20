@@ -1,94 +1,65 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0d0c">
-  <meta name="description" content="RestX — contador de descanso para academia.">
-  <link rel="manifest" href="manifest.json">
-  <link rel="icon" href="icons/icon-192.svg" type="image/svg+xml">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-  <title>RestX — Rest Timer</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b0a">
+<meta name="description" content="RestX — contador de descanso para academia">
+<link rel="manifest" href="manifest.json">
+<link rel="stylesheet" href="style.css">
+<title>RestX</title>
 </head>
 <body>
-  <main class="app">
-    <div class="bg-image" aria-hidden="true"></div>
-    <div class="overlay" aria-hidden="true"></div>
+<div class="background"><img src="assets_bg.svg" alt=""></div>
+<main class="app">
+  <header class="topbar">
+    <div class="brand"><span class="brand-dot"></span><strong>RestX</strong><span class="brand-sub">REST TIMER</span></div>
+    <button id="installBtn" class="install" hidden aria-label="Instalar RestX">↓</button>
+  </header>
 
-    <section class="panel">
-      <header class="topbar">
-        <div class="brand">
-          <div class="brand-mark">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5v14M18 5v14M3.5 8.5h17M3.5 15.5h17M6 8.5V5M6 19v-3.5M18 8.5V5M18 19v-3.5"/></svg>
-          </div>
-          <div>
-            <strong>Rest<span>X</span></strong>
-            <small>REST TIMER</small>
-          </div>
-        </div>
-        <button id="installBtn" class="icon-btn install hidden" aria-label="Instalar RestX" title="Instalar RestX">
-          <svg viewBox="0 0 24 24"><path d="M12 3v11M8 10l4 4 4-4M5 19h14M7 16v3M17 16v3"/></svg>
-        </button>
-      </header>
-
-      <div class="content">
-        <div class="status" id="status">DESCANSO</div>
-
-        <div class="timer-wrap" id="timerWrap">
-          <svg class="progress-ring" viewBox="0 0 300 300" aria-hidden="true">
-            <circle class="ring-track" cx="150" cy="150" r="132"></circle>
-            <circle id="ring" class="ring-value" cx="150" cy="150" r="132"></circle>
-          </svg>
-          <div class="timer">
-            <span id="minutes">01</span><b>:</b><span id="seconds">00</span>
-          </div>
-        </div>
-
-        <div class="adjust">
-          <button id="minus" class="round-btn" aria-label="Diminuir 5 segundos">
-            <svg viewBox="0 0 24 24"><path d="M5 12h14"/></svg>
-          </button>
-          <span id="setLabel">60 SEC</span>
-          <button id="plus" class="round-btn" aria-label="Aumentar 5 segundos">
-            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
-          </button>
-        </div>
-
-        <div class="presets" aria-label="Tempos rápidos">
-          <button data-time="30">30s</button>
-          <button data-time="45">45s</button>
-          <button data-time="60" class="active">60s</button>
-          <button data-time="90">90s</button>
-          <button data-time="120">120s</button>
-        </div>
-
-        <div class="controls">
-          <button id="reset" class="control secondary" aria-label="Resetar">
-            <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.65L4 8.65M4 4v4.65h4.65"/></svg>
-            <span>Reset</span>
-          </button>
-          <button id="start" class="control primary" aria-label="Iniciar">
-            <svg id="startIcon" viewBox="0 0 24 24"><path d="m9 5 10 7-10 7V5Z"/></svg>
-            <span id="startText">Iniciar</span>
-          </button>
-          <button id="pause" class="control secondary" aria-label="Pausar">
-            <svg viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></svg>
-            <span>Pausar</span>
-          </button>
-        </div>
-
-        <div id="done" class="done" role="status" aria-live="polite">
-          <strong>DESCANSO FINALIZADO</strong>
-          <span>Pronto para a próxima série.</span>
-        </div>
+  <section class="timer-section">
+    <div class="eyebrow">DESCANSO</div>
+    <div class="timer-wrap"><div class="sound-waves" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <svg class="progress" viewBox="0 0 300 300" aria-hidden="true">
+        <circle class="track" cx="150" cy="150" r="132"></circle>
+        <circle id="ring" class="ring" cx="150" cy="150" r="132"></circle>
+      </svg>
+      <div class="timer-center">
+        <span id="status">PRONTO</span>
+        <div class="time"><span id="minutes">01</span><b>:</b><span id="seconds">00</span></div>
+        <span class="next">PRÓXIMO EXERCÍCIO</span>
       </div>
+    </div>
 
-      <footer>RESTX <span>•</span> TRAIN SMARTER</footer>
-    </section>
-  </main>
-  <script src="app.js"></script>
+    <div id="done" class="done" role="status" aria-live="assertive">DESCANSO FINALIZADO</div>
+
+    <div class="controls">
+      <button id="minus" class="small-btn" aria-label="Diminuir 5 segundos">−5</button>
+      <button id="start" class="start-btn">
+        <svg id="startIcon" viewBox="0 0 24 24"><path d="m9 5 10 7-10 7V5Z"/></svg>
+        <span id="startText">Iniciar</span>
+      </button>
+      <button id="reset" class="small-btn" aria-label="Resetar">↻</button>
+      <button id="plus" class="small-btn" aria-label="Aumentar 5 segundos">+5</button>
+    </div>
+  </section>
+
+  <section class="presets">
+    <span>DESCANSO RÁPIDO</span>
+    <div class="preset-list">
+      <button class="preset" data-time="30">30s</button>
+      <button class="preset" data-time="45">45s</button>
+      <button class="preset active" data-time="60">60s</button>
+      <button class="preset" data-time="90">90s</button>
+      <button class="preset" data-time="120">120s</button>
+    </div>
+  </section>
+
+  <footer><span>Treine.</span><span>Descanse.</span><span>Repita.</span></footer>
+  <audio id="restxAlertAudio" preload="auto" playsinline>
+    <source src="restx-alert.wav" type="audio/wav">
+  </audio>
+</main>
+<script src="app.js"></script>
 </body>
 </html>
