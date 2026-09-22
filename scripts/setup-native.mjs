@@ -15,9 +15,20 @@ function patchAndroidManifest(){
   const manifest=path.join(root,'android','app','src','main','AndroidManifest.xml');
   if(!fs.existsSync(manifest)) return;
   let s=fs.readFileSync(manifest,'utf8');
-  const perm='    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />\n';
-  if(!s.includes('android.permission.SCHEDULE_EXACT_ALARM')){
-    s=s.replace(/<manifest[^>]*>\s*/,'$&'+perm);
+  const perms=[
+    'android.permission.SCHEDULE_EXACT_ALARM',
+    'android.permission.USE_EXACT_ALARM',
+    'android.permission.POST_NOTIFICATIONS',
+    'android.permission.VIBRATE',
+    'android.permission.WAKE_LOCK',
+    'android.permission.RECEIVE_BOOT_COMPLETED'
+  ];
+  let added='';
+  for(const p of perms){
+    if(!s.includes(p)) added+=`    <uses-permission android:name="${p}" />\n`;
+  }
+  if(added){
+    s=s.replace(/<manifest[^>]*>\s*/,'$&'+added);
     fs.writeFileSync(manifest,s);
   }
 }

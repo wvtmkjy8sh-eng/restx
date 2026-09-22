@@ -1,1 +1,39 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1100"><defs><linearGradient id="g"><stop stop-color="#162019"/><stop offset=".55" stop-color="#070908"/><stop offset="1" stop-color="#101611"/></linearGradient><radialGradient id="l"><stop stop-color="#b7ff35" stop-opacity=".28"/><stop offset="1" stop-color="#b7ff35" stop-opacity="0"/></radialGradient></defs><rect width="900" height="1100" fill="url(#g)"/><circle cx="690" cy="210" r="300" fill="url(#l)"/><g fill="none" stroke="#b7ff35" stroke-linecap="round"><circle cx="485" cy="230" r="72" stroke-width="8"/><path stroke-width="14" d="M450 305c-10 58-8 110 28 166l55 84m-83-218-110 48m138-16 122 36m-92 150-48 168m78-118 104 143"/><path stroke-width="12" d="M280 560h-85m70-18 28 36m-40-36-28 36M635 500h110m-25-20 30 40m-58-40-30 40"/></g></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1100">
+  <defs>
+    <radialGradient id="blueGlow" cx="14%" cy="8%" r="48%">
+      <stop offset="0%" stop-color="#60a5fa" stop-opacity=".3"/>
+      <stop offset="100%" stop-color="#60a5fa" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="purpleGlow" cx="84%" cy="12%" r="42%">
+      <stop offset="0%" stop-color="#a78bfa" stop-opacity=".24"/>
+      <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="veil" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b1020" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#0b1020" stop-opacity=".5"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="1100" fill="#0b1020"/>
+  <rect width="900" height="1100" fill="url(#blueGlow)"/>
+  <rect width="900" height="1100" fill="url(#purpleGlow)"/>
+  <g fill="#f7f8ff" opacity=".2">
+    <path d="M690 150c18-6 40 6 46 26 4 14-4 28-18 34-6 18-22 30-40 28-22-2-38-20-38-42 0-24 22-46 50-46z"/>
+    <path d="M724 162c28 4 46 28 42 52-2 10-8 16-16 18 6-22 2-40-10-52-8-8-10-16-16-18z"/>
+    <path d="M560 292c22-48 150-52 184 0 16 24 18 58 6 96-16 52-46 86-78 98-36 14-78 6-104-22-28-30-36-78-8-172z"/>
+    <path d="M548 300c-18 20-48 28-78 18-8-2-12 10-6 16 34 14 74 8 100-16 10-8 4-22-16-18z"/>
+    <path d="M748 304c20 18 52 24 80 12 8-4 6-18-4-16-26 8-52 2-70-14-8-6-16 8-6 18z"/>
+    <rect x="438" y="286" width="62" height="14" rx="7"/>
+    <rect x="446" y="274" width="10" height="38" rx="5"/>
+    <rect x="482" y="274" width="10" height="38" rx="5"/>
+    <rect x="792" y="284" width="62" height="14" rx="7"/>
+    <rect x="800" y="272" width="10" height="38" rx="5"/>
+    <rect x="836" y="272" width="10" height="38" rx="5"/>
+    <path d="M600 500c-8 70-20 130 8 196 16 38 8 86-6 140-6 22 20 28 28 10 18-48 22-92 16-132-10-78 4-140 18-204 8-28-22-36-64-10z"/>
+    <path d="M708 498c18 68 28 128 8 200-12 42-6 90 10 138 6 20-18 32-28 14-22-46-28-88-20-128-8-70-16-132-8-206 4-36 46-48 38-18z"/>
+    <path d="M590 836c-6 36 4 74 22 104 8 14-8 26-18 16-24-36-34-80-26-122 4-16 18-14 22 2z"/>
+    <path d="M742 834c10 38 4 78-16 110-8 12-26-2-18-16 16-28 24-64 18-98-2-16 12-16 16 4z"/>
+    <path d="M560 944c28 12 52 8 70-8 6-6 16 2 10 10-24 22-58 26-92 10-10-4-4-16 12-12z"/>
+    <path d="M700 946c30 8 58 0 74-16 6-6 16 4 8 12-22 22-60 30-98 16-12-4-2-18 16-12z"/>
+  </g>
+  <rect width="900" height="1100" fill="url(#veil)"/>
+</svg>
