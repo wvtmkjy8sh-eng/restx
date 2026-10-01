@@ -282,7 +282,9 @@ async function enableNotifications(){
   if(Notification.permission==='denied')return false;
   try{return await Notification.requestPermission()==='granted'}catch(e){return false}
 }
-function notifyFinish(){
+let swReg=null;
+function notifyFinish(id){
+  if(isNativeApp())return;
   const title='RestX — descanso finalizado';
   const options={
     body:'Seu descanso terminou. Próximo exercício.',
@@ -294,16 +296,22 @@ function notifyFinish(){
     icon:'./icons/icon-192.svg',
     badge:'./icons/icon-192.svg',
     vibrate:[400,100,400,100,700],
-    data:{url:'./'}
+    data:{url:'./',endAt:id}
   };
-  try{
-    if(navigator.serviceWorker){
-      navigator.serviceWorker.ready.then(reg=>{
-        if(reg.showNotification)return reg.showNotification(title,options);
-        if(reg.active)reg.active.postMessage({type:'SHOW_FINISH_NOTIFICATION',title,options});
-      }).catch(()=>{});
+  if(swReg){
+    const sw=navigator.serviceWorker.controller||swReg.active;
+    if(sw){
+      try{sw.postMessage({type:'SHOW_FINISH_NOTIFICATION',endAt:id,title,options});return}catch(e){}
     }
-  }catch(e){}
+    Promise.race([
+      swReg.getNotifications().catch(()=>[]),
+      new Promise(r=>setTimeout(()=>r([]),400))
+    ]).then(list=>{
+      if(list.some(n=>n.data&&n.data.endAt===id))return;
+      return swReg.showNotification(title,options);
+    }).catch(()=>{});
+    return;
+  }
   try{
     if('Notification' in window && Notification.permission==='granted'){
       new Notification(title,options);
@@ -398,6 +406,7 @@ function choose(v){
 function adjust(d){choose(Math.min(3600,Math.max(5,selected+d)))}
 function finish(){
   if(!running)return;
+  const finishedAt=endAt;
   running=false;endAt=0;
   clearBackgroundTimer();
   cancelAnimationFrame(raf);
@@ -407,9 +416,11 @@ function finish(){
   done.classList.add('show');
   saveTimer();
   cancelNativeFinish();
-  try{navigator.serviceWorker?.controller?.postMessage({type:'CANCEL_TIMER'})}catch(e){}
+  if(isNativeApp()){
+    try{navigator.serviceWorker?.controller?.postMessage({type:'CANCEL_TIMER'})}catch(e){}
+  }
   if(document.visibilityState==='hidden')pendingBeep=true;
-  notifyFinish();
+  notifyFinish(finishedAt);
   beep();
   setTimeout(stopKeepAlive,2600);
   setTimeout(()=>{
@@ -509,6 +520,7 @@ if('serviceWorker'in navigator){
   addEventListener('load',async()=>{
     try{
       const reg=await navigator.serviceWorker.register('./sw.js');
+      swReg=reg;
       if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});
       restoreTimer();
       navigator.serviceWorker.addEventListener('controllerchange',()=>{});

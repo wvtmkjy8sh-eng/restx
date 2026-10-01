@@ -1,13 +1,13 @@
-const C='restx-v11';
+const C='restx-v15';
 const A=[
   './','./index.html','./style.css','./app.js','./manifest.json',
   './assets_bg.jpg','./restx-alert.wav','./restx-keepalive.wav','./icons/icon-192.svg','./icons/icon-512.svg'
 ];
 
-let timerId=0;
+let timerId=0,lastShownEndAt=0;
 
 self.addEventListener('install',e=>{
-  e.waitUntil(caches.open(C).then(c=>c.addAll(A)).then(()=>self.skipWaiting()));
+  e.waitUntil(caches.open(C).then(c=>c.addAll(A.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting()));
 });
 self.addEventListener('activate',e=>{
   e.waitUntil(
@@ -22,7 +22,7 @@ self.addEventListener('fetch',e=>{
   const live=e.request.mode==='navigate'||dest==='document'||dest==='script'||dest==='style';
   if(live){
     e.respondWith(
-      fetch(e.request).then(res=>{
+      fetch(e.request,{cache:'no-cache'}).then(res=>{
         if(res&&res.ok){
           const copy=res.clone();
           caches.open(C).then(c=>c.put(e.request,copy)).catch(()=>{});
@@ -43,6 +43,18 @@ self.addEventListener('fetch',e=>{
   );
 });
 
+function listNotifications(opts){
+  return Promise.race([
+    self.registration.getNotifications(opts).catch(()=>[]),
+    new Promise(r=>setTimeout(()=>r([]),400))
+  ]);
+}
+
+function clearTimer(){
+  if(timerId)clearTimeout(timerId);
+  timerId=0;
+}
+
 self.addEventListener('message',e=>{
   const d=e.data||{};
   if(d.type==='SKIP_WAITING'){
@@ -50,47 +62,50 @@ self.addEventListener('message',e=>{
     return;
   }
   if(d.type==='CANCEL_TIMER'){
-    if(timerId)clearTimeout(timerId);
-    timerId=0;
-    self.registration.getNotifications().then(list=>{
-      list.forEach(n=>{
-        if(n.tag==='restx-rest-scheduled')n.close();
-      });
-    }).catch(()=>{});
+    clearTimer();
+    e.waitUntil(
+      listNotifications({tag:'restx-rest-scheduled',includeTriggered:true})
+        .then(list=>list.forEach(n=>n.close()))
+        .catch(()=>{})
+    );
     return;
   }
   if(d.type==='ARM_TIMER'){
-    if(timerId)clearTimeout(timerId);
+    clearTimer();
     const endAt=Number(d.endAt);
     const delay=Math.max(0,endAt-Date.now()+80);
     timerId=setTimeout(()=>{
       timerId=0;
       showFinishNotification(
+        endAt,
         d.title||'RestX — descanso finalizado',
         d.body||'Seu descanso terminou. Próximo exercício.',
         d.url||'./'
       );
     },Math.min(delay,2147483647));
-    scheduleTimestampNotification(
+    e.waitUntil(scheduleTimestampNotification(
       endAt,
       d.title||'RestX — descanso finalizado',
       d.body||'Seu descanso terminou. Próximo exercício.',
       d.url||'./'
-    );
+    ));
+    return;
   }
   if(d.type==='SHOW_FINISH_NOTIFICATION'){
-    showFinishNotification(
+    clearTimer();
+    e.waitUntil(showFinishNotification(
+      Number(d.endAt)||0,
       d.title||'RestX — descanso finalizado',
       d.options?.body||'Seu descanso terminou. Próximo exercício.',
       d.options?.data?.url||'./'
-    );
+    ));
   }
 });
 
 async function scheduleTimestampNotification(endAt,title,body,url){
   if(typeof TimestampTrigger==='undefined')return;
   try{
-    const old=await self.registration.getNotifications({tag:'restx-rest-scheduled'});
+    const old=await listNotifications({tag:'restx-rest-scheduled',includeTriggered:true});
     old.forEach(n=>n.close());
     if(endAt<=Date.now())return;
     await self.registration.showNotification(title,{
@@ -100,13 +115,19 @@ async function scheduleTimestampNotification(endAt,title,body,url){
       badge:'./icons/icon-192.svg',
       vibrate:[400,100,400,100,700],
       silent:false,
-      data:{url},
+      data:{url,endAt},
       showTrigger:new TimestampTrigger(endAt)
     });
   }catch(e){}
 }
 
-async function showFinishNotification(title,body,url){
+async function showFinishNotification(endAt,title,body,url){
+  if(endAt){
+    if(endAt===lastShownEndAt)return;
+    lastShownEndAt=endAt;
+    const shown=await listNotifications();
+    if(shown.some(n=>n.data&&n.data.endAt===endAt))return;
+  }
   try{
     await self.registration.showNotification(title,{
       body,
@@ -118,7 +139,7 @@ async function showFinishNotification(title,body,url){
       icon:'./icons/icon-192.svg',
       badge:'./icons/icon-192.svg',
       vibrate:[400,100,400,100,700],
-      data:{url}
+      data:{url,endAt}
     });
   }catch(e){}
 }
