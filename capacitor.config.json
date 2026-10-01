@@ -6,7 +6,7 @@
   "plugins": {
     "LocalNotifications": {
       "smallIcon": "ic_stat_restx",
-      "iconColor": "#B8FF3D",
+      "iconColor": "#A855F7",
       "sound": "restx_alert.wav",
       "presentationOptions": [
         "badge",

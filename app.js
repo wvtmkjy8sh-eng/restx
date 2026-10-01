@@ -225,7 +225,7 @@ async function setupNativeNotifications(){
           importance:5,
           vibration:true,
           lights:true,
-          lightColor:'#B8FF3D'
+          lightColor:'#A855F7'
         });
       }catch(e){}
     }

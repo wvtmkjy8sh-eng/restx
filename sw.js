@@ -1,7 +1,8 @@
-const C='restx-v15';
+const C='restx-v16';
 const A=[
   './','./index.html','./style.css','./app.js','./manifest.json',
-  './assets_bg.jpg','./restx-alert.wav','./restx-keepalive.wav','./icons/icon-192.svg','./icons/icon-512.svg'
+  './assets_bg.jpg','./restx-alert.wav','./restx-keepalive.wav','./icons/icon-192.svg','./icons/icon-512.svg',
+  './icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png'
 ];
 
 let timerId=0,lastShownEndAt=0;
